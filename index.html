@@ -17,16 +17,12 @@
             font-weight: bold;
             margin-bottom: 20px;
         }
-        .gallery {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+        #imageContainer {
+            margin-top: 20px;
         }
-        .gallery img {
-            width: 300px;
-            height: 200px;
-            object-fit: cover;
-            margin: 10px;
+        #imageContainer img {
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
@@ -35,33 +31,40 @@
     <p class="warning">
         注意: このページは大量のデータを消費します。モバイルデータ通信ではなく、Wifi接続でのみご利用ください。
     </p>
-    <div class="gallery" id="gallery"></div>
+    <div id="imageContainer"></div>
 
     <script>
-        const gallery = document.getElementById('gallery');
-        const imageCount = 100; // 初回に読み込む画像の数
-        const apiUrl = 'https://source.unsplash.com/random/800x600'; // Unsplashのランダム画像API
+        const container = document.getElementById('imageContainer');
+        const imageUrl = 'https://raw.githubusercontent.com/arurion/waifai/main/DSCN1329.JPG';
 
-        // 画像を追加する関数
-        function addImage() {
+        // 画像を読み込んでクリアする関数
+        function loadAndClearImage() {
+            // 既存の画像をクリア
+            container.innerHTML = '';
+
+            // 新しい画像を作成
             const img = document.createElement('img');
-            img.src = `${apiUrl}?sig=${Math.random()}`; // ランダムな画像を毎回取得
-            gallery.appendChild(img);
+            const timestamp = new Date().getTime(); // キャッシュ回避用のタイムスタンプ
+            img.src = `${imageUrl}?t=${timestamp}`; // ランダムなクエリパラメータを追加
+            img.alt = '通信量増加用画像';
+
+            // 画像をコンテナに追加
+            container.appendChild(img);
+
+            // 読み込み完了を確認（通信が発生したことを確認）
+            img.onload = () => {
+                console.log('画像が読み込まれました');
+            };
+            img.onerror = () => {
+                console.error('画像の読み込みに失敗しました');
+            };
         }
 
-        // 初期表示用の画像を読み込む
-        for (let i = 0; i < imageCount; i++) {
-            addImage();
-        }
+        // 初回読み込み
+        loadAndClearImage();
 
-        // 10秒ごとに1枚の画像を更新して通信量を増やす
-        setInterval(() => {
-            const images = gallery.getElementsByTagName('img');
-            if (images.length > 0) {
-                const randomIndex = Math.floor(Math.random() * images.length);
-                images[randomIndex].src = `${apiUrl}?sig=${Math.random()}`; // ランダムな画像に差し替え
-            }
-        }, 10000);
+        // 5秒ごとに画像を読み込んでクリア
+        setInterval(loadAndClearImage, 5000);
     </script>
 </body>
 </html>
